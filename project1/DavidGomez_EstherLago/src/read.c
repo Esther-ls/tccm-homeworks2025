@@ -19,7 +19,7 @@ trexio_t* open_fun(const char* filename){
 }
 
 
-trexio_t* close_fun(trexio_t * trexio_file){ 
+void close_fun(trexio_t * trexio_file){ 
  trexio_exit_code rc; // rc variable: save the exit code
  rc = trexio_close(trexio_file);
  if (rc != TREXIO_SUCCESS) {
@@ -29,8 +29,3 @@ trexio_t* close_fun(trexio_t * trexio_file){
  trexio_file = NULL;
 }
 
-
-/*trexio_t* NN_E(trexio_t* trexio_file){
-	trexio_exit_code trexio_read_nucleus_repulsion(trexio_t* const trexio_file, double* const energy);
-	return trexio_exit_code
-}*/
