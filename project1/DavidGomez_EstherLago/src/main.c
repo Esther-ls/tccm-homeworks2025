@@ -16,5 +16,5 @@ double main() {
 		exit(1);
 	}
 	close_fun(file);
-	printf("%lf", &Enn);
+	printf("%lf\n", Enn);
 }
