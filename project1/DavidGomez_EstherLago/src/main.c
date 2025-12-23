@@ -69,10 +69,11 @@ double main() {
 		int l = index[4*n+3];
 		double integral = value[n];
 		if (i==k & j==l) {
-			printf("<%d %d|%d %d> = %lf\n", i, j, k, l, integral); 
+			printf("<ij|ij> = <%d %d|%d %d> = %lf\n", i, j, k, l, integral); 
+		}	
+		if (i==j & k==l) { //esto es lo mismo que que ij|ji por la conversion que se hace en la pagina 7 del pdf 
+			printf("<ij|ji> = <ii|jj> = <%d %d|%d %d> = %lf\n", i, j, k, l, integral);
 		}
 	}
-
-	
-	return 0;
+		return 0;
 }
