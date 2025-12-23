@@ -7,7 +7,7 @@ trexio_t * open_fun(const char * filename);
 void close_fun(trexio_t * trexio_file); 
 
 double main() {
-	trexio_t* trexio_file = open_fun("h2o.h5");
+	trexio_t* trexio_file = open_fun("co2.h5");
 	trexio_exit_code rc;
 	double Enn;
 	int32_t n_up;
@@ -94,5 +94,18 @@ double main() {
 	E = Enn + 2*E_1e + 2*E_2e_ijij - E_2e_ijji;
 	printf("Enn=%lf\n E_1e=%lf\n 2*E_2e_ijij=%lf\n E_2e_ijji=%lf\n",Enn, E_1e, 2*E_2e_ijij, E_2e_ijji);
 	printf("E = %lf\n", E);
+/*
+	//Ahora vamos a hacer MP2
+	double * const mo_energy = malloc(mo_num * sizeof(double));
+	rc = trexio_read_mo_energy(trexio_file, mo_energy);
+	if (rc != TREXIO_SUCCESS) {
+    		printf("Fallo leyendo mo_energy\n");
+    		printf("TREXIO error: %s\n", trexio_string_of_error(rc));
+    		return 1;
+	}	
+	for (int64_t i=0; i<mo_num; i++) {
+		printf("MP2[%ld]=%lf", i, mo_energy[i]);
+	}
+	*/
 		return 0;
 }
