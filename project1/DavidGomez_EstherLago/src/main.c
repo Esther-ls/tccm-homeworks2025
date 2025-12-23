@@ -62,7 +62,17 @@ double main() {
         for (int64_t i=0 ; i<100 ; i++) {
                 printf("integral[%ld]   =%d\n", i, index[i]);
         } // aqui salen 4 valores seguidos, que representan los indices de la integral <ij||kl>
-	for (int64_t i=0; 
+	for (int64_t n=0; n<n_integrals; n++) {
+		int i = index[4*n+0];
+		int j = index[4*n+1];
+		int k = index[4*n+2];
+		int l = index[4*n+3];
+		double integral = value[n];
+		if (i==k & j==l) {
+			printf("<%d %d|%d %d> = %lf\n", i, j, k, l, integral); 
+		}
+	}
 
+	
 	return 0;
 }
