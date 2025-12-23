@@ -33,8 +33,8 @@ double main() {
 	double * data = malloc(mo_num * mo_num * sizeof(double));
 	rc = trexio_read_mo_1e_int_core_hamiltonian(trexio_file, data);
     	printf("\n\tOne-Electron Integrals (au)\n");
-	for (int i=0 ; i<mo_num*mo_num ; i+=mo_num+1) { // 25 pq solo elementos diagonal ppal, y es matriz 24x24 
-        printf("<i|h|i> (i=%d)       = %lf\n",i+1, data[i]);
+	for (int x=0 ; x<mo_num*mo_num ; x+=mo_num+1) { // 25 pq solo elementos diagonal ppal, y es matriz 24x24 
+        printf("<i|h|i> (i=%d)       = %lf\n",(x%mo_num)+1, data[x]);
     	}
 
 	/*Read and write Two-Electron integrals*/
