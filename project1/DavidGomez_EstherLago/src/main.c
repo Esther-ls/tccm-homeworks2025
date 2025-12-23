@@ -52,7 +52,7 @@ double main() {
 	}
 	rc = trexio_read_mo_2e_int_eri(trexio_file, offset_file, &buffer_size, index, value);
 	close_fun(trexio_file);
-	/* Pruebas pero sobra
+	// Pruebas pero sobra
 	printf("%ld\n", n_integrals);
 	printf("%ld\n", offset_file);
 	printf("%ld\n", buffer_size);
@@ -61,8 +61,8 @@ double main() {
 	}
         for (int64_t i=0 ; i<100 ; i++) {
                 printf("integral[%ld]   =%d\n", i, index[i]);
-        }
-	*/
+        } // aqui salen 4 valores seguidos, que representan los indices de la integral <ij||kl>
+	for (int64_t i=0; 
 
 	return 0;
 }
