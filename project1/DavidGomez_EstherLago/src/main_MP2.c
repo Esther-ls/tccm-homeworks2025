@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <trexio.h>
 #include <stdlib.h>
+#define pointer(i,j,k,l) ((i)*mo_num*mo_num*mo_num + (j)*mo_num*mo_num + (k)*mo_num +(l))
 
 trexio_t * open_fun(const char * filename);
 
@@ -46,6 +47,7 @@ double main() {
     		printf("TREXIO error reading molecular orbital energies: %s\n", trexio_string_of_error(rc));
     		return 1;
 	}
+
 	/*Read and write Two-Electron integrals*/
 	double E_2e_ijij = 0;
 	double E_2e_ijji = 0;
@@ -72,6 +74,9 @@ double main() {
         for (int64_t i=0 ; i<100 ; i++) {
                 printf("integral[%ld]   =%d\n", i, index[i]);
         } // aqui salen 4 valores seguidos, que representan los indices de la integral <ij||kl> */
+	
+	double* ERI = malloc(mo_num * mo_num * mo_num * mo_num * sizeof(double));//save n-fold integrals
+		
 	double division = 0;
 	for (int64_t n=0; n<n_integrals; n++) {
 		int i = index[4*n+0];
@@ -79,50 +84,31 @@ double main() {
 		int a = index[4*n+2];
 		int b = index[4*n+3];
 		double integral = value[n];
-		if (i<n_up && j<n_up && i==a && j==b) {
-			printf("<ij|ij> = <%d %d|%d %d> =	%lf\n", i, j, a, b, integral); 
-			E_2e_ijij = E_2e_ijij + integral;
-			if (i!=j) {
-				E_2e_ijij = E_2e_ijij + integral;
-			}
-			
-		}	
-		if (i<n_up && a<n_up && i==j && a==b) { //esto es lo mismo que que ij|ji por la conversion que se hace en la pagina 7 del pdf 
-			printf("<ij|ji> = <ii|jj> = <%d %d|%d %d> =	%lf\n", i, j, a, b, integral);
-			E_2e_ijji = E_2e_ijji + integral;
-			if (i!=b) {
-				E_2e_ijji = E_2e_ijji + integral;
-			}
-		}
-		//Two-electron integrals para MP2
-		
-		
-		
-		if (a<n_up && b<n_up && i>=n_up && j>=n_up) {
-			printf("uno<ij|ab> =	<%d %d|%d %d> = 	%lf\n", a, b, i, j, integral);//Estamos cogiendo <a b | i j>
-			if (i==j) {
-				double patatas = integral * integral ;
-				double Filadelfia = mo_energy[a] + mo_energy[b] - 2*mo_energy[i];
-				division = division + patatas/Filadelfia;
-				printf("dos\n");
-			} else {
-				for (int64_t m=0; m<n_integrals; m++) {
-		                	int i2 = index[4*m+0];
-        	        		int j2 = index[4*m+1];
-                			int a2 = index[4*m+2];
-                			int b2 = index[4*m+3];
-        	        		double exchange = value[m];
-					if (a2==b && b2==a && i2==i && j2==j) {
-						printf("dos<ij|ab> =	<%d %d|%d %d> =	%lf\n", a2, b2, i2, j2, exchange);
-				
-				double patatas = integral * (2*integral - exchange);
-				double Filadelfia = mo_energy[a] + mo_energy[b] - mo_energy[i] - mo_energy[j];
-				division = division + patatas/Filadelfia;
-					}
-				}
-			}	
+		ERI[pointer(i,j,a,b)] = integral;
+		ERI[pointer(a,j,i,b)] = integral;
+		ERI[pointer(i,b,a,j)] = integral;
+		ERI[pointer(a,b,i,j)] = integral;
+		ERI[pointer(j,i,b,a)] = integral;
+		ERI[pointer(b,i,j,a)] = integral;
+		ERI[pointer(j,a,b,i)] = integral;
+		ERI[pointer(b,a,j,i)] = integral;
+	}
+	//Two-electron integrals para MP2
+	for (int n=0; n<n_integrals; n++) {
+		int i = index[4*n+0];
+		int j = index[4*n+1];
+		int a = index[4*n+2];
+		int b = index[4*n+3];
+	
+		if (i<n_up && j<n_up && a>=n_up && b>=n_up) {
+			printf("<ij|ab> =	<%d %d|%d %d> = 	%lf\n", i, j, a, b, ERI[pointer(i,j,a,b)]);
+			printf("<ij|ba> =	<%d %d|%d %d> =		%lf\n", i, j, b, a, ERI[pointer(i,j,b,a)]);
+			double patatas = ERI[pointer(i,j,a,b)] * (2*ERI[pointer(i,j,a,b)] - ERI[pointer(i,j,b,a)]);
+			double Filadelfia = mo_energy[i] + mo_energy[j] - mo_energy[a] - mo_energy[b];
+			division = division + patatas/Filadelfia;
 		}
 	}
+				
 	//Final HF sum 
 	double E;
 	E = Enn + 2*E_1e + 2*E_2e_ijij - E_2e_ijji;
