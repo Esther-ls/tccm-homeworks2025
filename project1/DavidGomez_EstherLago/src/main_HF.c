@@ -55,16 +55,6 @@ double main() {
 		exit(1);
 	}
 	rc = trexio_read_mo_2e_int_eri(trexio_file, offset_file, &buffer_size, index, value);
-	/* Pruebas pero sobra
-	printf("%ld\n", n_integrals);
-	printf("%ld\n", offset_file);
-	printf("%ld\n", buffer_size);
-	for (int64_t i=0 ; i<n_integrals ; i++) {
-		printf("integral[%ld]	=%lf\n", i, value[i]);
-	}
-        for (int64_t i=0 ; i<100 ; i++) {
-                printf("integral[%ld]   =%d\n", i, index[i]);
-        } // aqui salen 4 valores seguidos, que representan los indices de la integral <ij||kl> */
 	for (int64_t n=0; n<n_integrals; n++) {
 		int i = index[4*n+0];
 		int j = index[4*n+1];
@@ -77,7 +67,6 @@ double main() {
 			if (i!=j) {
 				E_2e_ijij = E_2e_ijij + integral;
 			}
-			
 		}	
 		if (i<n_up && k<n_up && i==j && k==l) { //esto es lo mismo que que ij|ji por la conversion que se hace en la pagina 7 del pdf 
 			printf("<ij|ji> = <ii|jj> = <%d %d|%d %d> =	%lf\n", i, j, k, l, integral);
@@ -88,22 +77,14 @@ double main() {
 		}
 	}
 
+	close_fun(trexio_file);	
+	
+	
 	//Final HF sum 
 	double E;
 	E = Enn + 2*E_1e + 2*E_2e_ijij - E_2e_ijji;
 	printf("Enn=%lf\n E_1e=%lf\n 2*E_2e_ijij=%lf\n E_2e_ijji=%lf\n",Enn, E_1e, 2*E_2e_ijij, E_2e_ijji);
 	printf("E = %lf\n", E);
 
-	//Ahora vamos a hacer MP2
-	double * mo_energy = malloc(mo_num * sizeof(double));
-	rc = trexio_read_mo_energy(trexio_file, mo_energy);
-	if (rc != TREXIO_SUCCESS) {
-    		printf("TREXIO error reading molecular orbital energies: %s\n", trexio_string_of_error(rc));
-    		return 1;
-	}
-	for (int64_t i=0; i<mo_num; i++) {
-		printf("MP2[%ld]=%lf", i, mo_energy[i]);
-	}
-	close_fun(trexio_file);	
 		return 0;
 }
