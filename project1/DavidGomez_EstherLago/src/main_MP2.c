@@ -94,18 +94,17 @@ double main() {
 		ERI[pointer(b,a,j,i)] = integral;
 	}
 	//Two-electron integrals para MP2
-	for (int n=0; n<n_integrals; n++) {
-		int i = index[4*n+0];
-		int j = index[4*n+1];
-		int a = index[4*n+2];
-		int b = index[4*n+3];
-	
-		if (i<n_up && j<n_up && a>=n_up && b>=n_up) {
-			printf("<ij|ab> =	<%d %d|%d %d> = 	%lf\n", i, j, a, b, ERI[pointer(i,j,a,b)]);
-			printf("<ij|ba> =	<%d %d|%d %d> =		%lf\n", i, j, b, a, ERI[pointer(i,j,b,a)]);
-			double patatas = ERI[pointer(i,j,a,b)] * (2*ERI[pointer(i,j,a,b)] - ERI[pointer(i,j,b,a)]);
-			double Filadelfia = mo_energy[i] + mo_energy[j] - mo_energy[a] - mo_energy[b];
-			division = division + patatas/Filadelfia;
+	for (int i=0; i<n_up; i++){
+		for (int j=0; j<n_up; j++){
+			for (int a=n_up; a<mo_num; a++){
+				for (int b=n_up; b<mo_num; b++){
+					printf("<ij|ab> =	<%d %d|%d %d> = 	%lf\n", i, j, a, b, ERI[pointer(i,j,a,b)]);
+					printf("<ij|ba> =	<%d %d|%d %d> =		%lf\n", i, j, b, a, ERI[pointer(i,j,b,a)]);
+					double patatas = ERI[pointer(i,j,a,b)] * (2*ERI[pointer(i,j,a,b)] - ERI[pointer(i,j,b,a)]);
+					double Filadelfia = mo_energy[i] + mo_energy[j] - mo_energy[a] - mo_energy[b];
+					division = division + patatas/Filadelfia;
+				}
+			}
 		}
 	}
 				
