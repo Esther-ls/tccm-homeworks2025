@@ -11,13 +11,13 @@
 
 trexio_t * open_fun(const char * filename);
 
-double Nuclear_repulsion_energy(trexio_t * trexio_file);
+double Nuclear_repulsion_energy(trexio_t * trexio_file, double* Enn);
 
-int Occupied_orbitals(trexio_t * trexio_file);
-int Molecular_orbitals(trexio_t * trexio_file);
-double * one_e_integrals(trexio_t * trexio_file, int mo_num);
-double * mo_energies(trexio_t * trexio_file, int mo_num);
-int number_2_e_integrals(trexio_t * trexio_file);
+int Occupied_orbitals(trexio_t * trexio_file, int32_t* n_up);
+int Molecular_orbitals(trexio_t * trexio_file, int32_t* mo_num);
+double * one_e_integrals(trexio_t * trexio_file, int mo_num, double** data);
+double * mo_energies(trexio_t * trexio_file, int mo_num, double** mo_energy);
+int number_2_e_integrals(trexio_t * trexio_file, int64_t* n_integrals);
 double * two_e_integrals(trexio_t * trexio_file, int n_integrals, int32_t** index, double** value);
 void close_fun(trexio_t * trexio_file); 
 
@@ -28,37 +28,36 @@ double main() {
 	trexio_t* trexio_file = open_fun(input);
 	trexio_exit_code rc;
 
-	double Enn;
-	int32_t n_up;
-	int32_t mo_num;
-	int64_t n_integrals;
 	
 	/* Read and write nuclear repulsion energy */
-	Enn = Nuclear_repulsion_energy(trexio_file);
+	double Enn;
+	Nuclear_repulsion_energy(trexio_file, &Enn);
 	printf("Nuclear Repulsion Energy (au)	= %lf\n", Enn);
 
 	/*Read and write the number of occupied orbitals */
-	n_up = Occupied_orbitals(trexio_file);
+	int32_t n_up;
+	Occupied_orbitals(trexio_file, &n_up);
 	printf("Number of Occupied Orbitals	= %i\n", n_up);
 
 	/*Read and write One-Electron Integrals*/
-	double E_1e = 0;
-	mo_num = Molecular_orbitals(trexio_file);
+	int32_t mo_num;
+	Molecular_orbitals(trexio_file, &mo_num);
 	printf("Number of Molecular Orbitals	= %i\n", mo_num);
-	double * data;
-	data = one_e_integrals(trexio_file, mo_num);
-	
-	for (int x=0 ; x<n_up*mo_num ; x+=mo_num+1) { // 25 pq solo elementos diagonal ppal, y es matriz 24x24 
-        E_1e = E_1e + data[x];
-    	}
 
-	//MO orbitals para MP2
+	double * data;
+	one_e_integrals(trexio_file, mo_num, &data);
+	double E_1e = 0;
+	for (int x=0 ; x<n_up*mo_num ; x+=mo_num+1) { // 25 pq solo elementos diagonal ppal, y es matriz 24x24 
+        	E_1e = E_1e + data[x];
+    	}
+	
+	/*MO for MP2*/
         double * mo_energy = malloc(mo_num * sizeof(double));
-        mo_energy = mo_energies(trexio_file, mo_num);
+        mo_energies(trexio_file, mo_num, &mo_energy);
 
 	/*Read and write Two-Electron integrals*/
-	double Two_e_HF = 0;
-	n_integrals = number_2_e_integrals(trexio_file);
+	int64_t n_integrals;
+	number_2_e_integrals(trexio_file, &n_integrals);
 	int32_t* index = malloc(4 * n_integrals * sizeof(int32_t));
 	
 	double* value = malloc(n_integrals * sizeof(double));
@@ -85,6 +84,7 @@ double main() {
         }
 
 	//Two-electron integrals para MP2
+	double Two_e_HF = 0;
         for (int i=0; i<n_up; i++){
                 for (int j=0; j<n_up; j++){
                         for (int a=0; a<mo_num; a++){
