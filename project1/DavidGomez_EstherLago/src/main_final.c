@@ -1,3 +1,9 @@
+/**
+ * @file main_final.c
+ * @brief Program to read data from a TREXIO file using it to compute the 
+ * Hartree-Fock and MP2 energies
+ * @author David Gómez and Esther Lago
+ */
 #include <stdio.h>
 #include <trexio.h>
 #include <stdlib.h>
@@ -5,63 +11,59 @@
 
 trexio_t * open_fun(const char * filename);
 
+double Nuclear_repulsion_energy(trexio_t * trexio_file);
+
+int Occupied_orbitals(trexio_t * trexio_file);
+int Molecular_orbitals(trexio_t * trexio_file);
+double * one_e_integrals(trexio_t * trexio_file, int mo_num);
+double * mo_energies(trexio_t * trexio_file, int mo_num);
+int number_2_e_integrals(trexio_t * trexio_file);
+double * two_e_integrals(trexio_t * trexio_file, int n_integrals, int32_t** index, double** value);
 void close_fun(trexio_t * trexio_file); 
 
 double main() {
-	trexio_t* trexio_file = open_fun("h2o.h5");
+	//Open input as TREXIO file
+	char input[30];
+	scanf("%s", input);
+	trexio_t* trexio_file = open_fun(input);
 	trexio_exit_code rc;
+
 	double Enn;
 	int32_t n_up;
 	int32_t mo_num;
 	int64_t n_integrals;
-	int64_t offset_file  = 0;              // To start in the first two-electron integral
 	
 	/* Read and write nuclear repulsion energy */
-	rc = trexio_read_nucleus_repulsion(trexio_file, &Enn);
-	if (rc != TREXIO_SUCCESS) {
-		printf("TREXIO Error reading nuclear repulsion energy: \n%s\n", trexio_string_of_error(rc));
-		exit(1);
-	}
+	Enn = Nuclear_repulsion_energy(trexio_file);
 	printf("Nuclear Repulsion Energy (au)	= %lf\n", Enn);
 
 	/*Read and write the number of occupied orbitals */
-	rc = trexio_read_electron_up_num(trexio_file, &n_up);
+	n_up = Occupied_orbitals(trexio_file);
 	printf("Number of Occupied Orbitals	= %i\n", n_up);
 
 	/*Read and write One-Electron Integrals*/
 	double E_1e = 0;
-	rc = trexio_read_mo_num(trexio_file, &mo_num); //Number of MO
+	mo_num = Molecular_orbitals(trexio_file);
 	printf("Number of Molecular Orbitals	= %i\n", mo_num);
-	double * data = malloc(mo_num * mo_num * sizeof(double));
-	rc = trexio_read_mo_1e_int_core_hamiltonian(trexio_file, data);
+	double * data;
+	data = one_e_integrals(trexio_file, mo_num);
+	
 	for (int x=0 ; x<n_up*mo_num ; x+=mo_num+1) { // 25 pq solo elementos diagonal ppal, y es matriz 24x24 
         E_1e = E_1e + data[x];
     	}
 
 	//MO orbitals para MP2
         double * mo_energy = malloc(mo_num * sizeof(double));
-        rc = trexio_read_mo_energy(trexio_file, mo_energy);
-        if (rc != TREXIO_SUCCESS) {
-                printf("TREXIO error reading molecular orbital energies: %s\n", trexio_string_of_error(rc));
-                return 1;
-        }
+        mo_energy = mo_energies(trexio_file, mo_num);
 
 	/*Read and write Two-Electron integrals*/
 	double Two_e_HF = 0;
-	rc = trexio_read_mo_2e_int_eri_size(trexio_file, &n_integrals);
-	int64_t buffer_size  = n_integrals;    // Read all two-electron integrals
-	int32_t* const index = malloc(4 * n_integrals * sizeof(int32_t));
-	if (index == NULL) {
-		fprintf(stderr, "Malloc failed for index");
-		exit(1);
-	}
-	double* const value = malloc(n_integrals * sizeof(double));
-	if (value == NULL) {
-		fprintf(stderr, "Malloc failed for value");
-		exit(1);
-	}
-	rc = trexio_read_mo_2e_int_eri(trexio_file, offset_file, &buffer_size, index, value);
-
+	n_integrals = number_2_e_integrals(trexio_file);
+	int32_t* index = malloc(4 * n_integrals * sizeof(int32_t));
+	
+	double* value = malloc(n_integrals * sizeof(double));
+	
+	two_e_integrals(trexio_file, n_integrals, &index, &value);
 
 	double* ERI = malloc(mo_num * mo_num * mo_num * mo_num * sizeof(double));//save n-fold integrals
 
