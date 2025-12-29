@@ -68,7 +68,7 @@ double main() {
 	/*Read and write One-Electron Integrals*/
 	int32_t mo_num;
 	Molecular_orbitals(trexio_file, &mo_num);
-	printf("Number of Molecular Orbitals	= %i\n", mo_num);
+	fprintf(output_file,"Number of Molecular Orbitals	= %i\n", mo_num);
 
 	double * data;
 	one_e_integrals(trexio_file, mo_num, &data);
@@ -137,11 +137,11 @@ double main() {
 	//Final HF sum 
 	double E_HF;
 	E_HF = Enn + 2*E_1e + Two_e_HF;
-	printf("E_HF = %lf\n", E_HF);
+	fprintf(output_file,"E_HF = %lf\n", E_HF);
 
 	//Final MP2 energy
-	printf("MP2 energy correction= %lf\n", MP2_corr);
+	fprintf(output_file,"MP2 energy correction= %lf\n", MP2_corr);
 	double E_MP2 = E_HF+MP2_corr;
-	printf("MP2 energy=%lf\n", E_MP2);
+	fprintf(output_file,"MP2 energy=%lf\n", E_MP2);
 		return 0;
 }
