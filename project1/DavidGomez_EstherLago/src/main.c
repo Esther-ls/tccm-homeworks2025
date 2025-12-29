@@ -44,7 +44,7 @@ void close_fun(trexio_t * trexio_file);
 
 double main() {
 	//Open input as TREXIO file
-	printf("Write the name of the TREXIO file, \n");
+	printf("Write the name of the TREXIO file \n");
 	char input[30];
 	scanf("%s", input);
 	trexio_t* trexio_file = open_fun(input);
