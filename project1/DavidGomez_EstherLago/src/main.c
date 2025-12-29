@@ -2,23 +2,44 @@
  * @file main_final.c
  * @brief Program to read data from a TREXIO file using it to compute the 
  * Hartree-Fock and MP2 energies
- * @author David Gómez and Esther Lago
+ * @authors David Gómez and Esther Lago
  */
 #include <stdio.h>
 #include <trexio.h>
 #include <stdlib.h>
+
+/**
+ * @def pointer(i,j,k,l)
+ * @brief Macro to map 4D orbital indices to a linear 1D index.
+ * @param i,j,k,l Orbital indices.
+ */
 #define pointer(i,j,k,l) ((i)*mo_num*mo_num*mo_num + (j)*mo_num*mo_num + (k)*mo_num +(l))
 
+/** @brief Opens a TREXIO file. */
 trexio_t * open_fun(const char * filename);
 
-double Nuclear_repulsion_energy(trexio_t * trexio_file, double* Enn);
+/** @brief Reads nuclear repulsion energy. */
+void Nuclear_repulsion_energy(trexio_t * trexio_file, double* Enn);
 
-int Occupied_orbitals(trexio_t * trexio_file, int32_t* n_up);
-int Molecular_orbitals(trexio_t * trexio_file, int32_t* mo_num);
-double * one_e_integrals(trexio_t * trexio_file, int mo_num, double** data);
-double * mo_energies(trexio_t * trexio_file, int mo_num, double** mo_energy);
-int number_2_e_integrals(trexio_t * trexio_file, int64_t* n_integrals);
-double * two_e_integrals(trexio_t * trexio_file, int n_integrals, int32_t** index, double** value);
+/** @brief Reads the number of occupied orbitals. */
+void Occupied_orbitals(trexio_t * trexio_file, int32_t* n_up);
+
+/** @brief Reads the total number of molecular orbitals.*/
+void Molecular_orbitals(trexio_t * trexio_file, int32_t* mo_num);
+
+/** @brief Reads one-electron integrals. */
+void * one_e_integrals(trexio_t * trexio_file, int mo_num, double** data);
+
+/** @brief Reads the molecular orbital energies.*/
+void * mo_energies(trexio_t * trexio_file, int mo_num, double** mo_energy);
+
+/** @brief Reads the number of two-electron integrals.*/
+void number_2_e_integrals(trexio_t * trexio_file, int64_t* n_integrals);
+
+/** @brief Reads the indices (i, j, a, b) and the value of the two-electron integrals. */
+void * two_e_integrals(trexio_t * trexio_file, int n_integrals, int32_t** index, double** value);
+
+/** @brief Closes a TREXIO file. */
 void close_fun(trexio_t * trexio_file); 
 
 double main() {
@@ -85,7 +106,7 @@ double main() {
 
 	//Two-electron integrals para MP2
 	double Two_e_HF = 0;
-        for (int i=0; i<n_up; i++){
+ for (int i=0; i<n_up; i++){
                 for (int j=0; j<n_up; j++){
                         for (int a=0; a<mo_num; a++){
                                 for (int b=0; b<mo_num; b++){
@@ -98,7 +119,7 @@ double main() {
 	                                        double num = ERI[pointer(i,j,a,b)] * (2*ERI[pointer(i,j,a,b)] - ERI[pointer(i,j,b,a)]);
         	                                double den = mo_energy[i] + mo_energy[j] - mo_energy[a] - mo_energy[b];
                 	                        MP2_corr = MP2_corr + num/den;
-                                	}
+ }
 				}
                         }
                 }

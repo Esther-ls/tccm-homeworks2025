@@ -74,7 +74,7 @@ void Molecular_orbitals(trexio_t * trexio_file, int32_t* mo_num){
  *
  * @param trexio_file Pointer to the open TREXIO file.
  * @param mo_num Number of molecular orbitals (occupied + virtuals).
- * @param data Pointer to a double pointer. The function allocates memory and points *data to it.
+ * @param data Pointer to a double pointer where the one-electron integrals will be stored.
  */
 void * one_e_integrals(trexio_t * trexio_file, int mo_num, double** data){
 	* data = malloc(mo_num * mo_num * sizeof(double));
@@ -91,9 +91,9 @@ void * one_e_integrals(trexio_t * trexio_file, int mo_num, double** data){
  *
  * @param trexio_file Pointer to the open TREXIO file.
  * @param mo_num Number of molecular orbitals (used for allocation size).
- * @param mo_energy Pointer to a double pointer. The function allocates memory and points *mo_energy to it.
+ * @param mo_energy Pointer to a double pointer where the molecular orbital energies will be stored.
  */
-double * mo_energies(trexio_t * trexio_file, int mo_num, double** mo_energy){
+void * mo_energies(trexio_t * trexio_file, int mo_num, double** mo_energy){
 	* mo_energy = malloc(mo_num*sizeof(double));
 	trexio_exit_code rc;
 	rc = trexio_read_mo_energy(trexio_file, *mo_energy);
@@ -103,7 +103,12 @@ double * mo_energies(trexio_t * trexio_file, int mo_num, double** mo_energy){
         }
 }
 
-
+/**
+ * @brief Reads the number of two-electron integrals.
+ *
+ * @param trexio_file Pointer to the open TREXIO file.
+ * @param n_integrals Pointer to an int64 where the number of two-electron integrals will be stored.
+ */
 void number_2_e_integrals(trexio_t * trexio_file, int64_t* n_integrals){
 	trexio_exit_code rc;
 	rc = trexio_read_mo_2e_int_eri_size(trexio_file, n_integrals);
@@ -114,12 +119,12 @@ void number_2_e_integrals(trexio_t * trexio_file, int64_t* n_integrals){
 }
 
 /**
- * @brief Reads two-electron integrals in sparse format.
+ * @brief Reads the indices (i, j, a, b) and the value of the two-electron integrals.
  *
  * @param trexio_file Pointer to the open TREXIO file.
- * @param n_integrals Pointer to int64 where the number of integrals found will be stored.
- * @param index Pointer to an int32 pointer. Function allocates memory for indices (4 * n_int).
- * @param value Pointer to a double pointer. Function allocates memory for values (n_int).
+ * @param n_integrals Number of two-electron integrals.
+ * @param index Pointer to an int32 pointer where the indices of the two-electron integrals will be stored. 
+ * @param value Pointer to a double pointer where the value of the two-electron integrals will be stored. 
  */
 void two_e_integrals(trexio_t * trexio_file, int n_integrals, int32_t** index_out, double** value_out){
 	int64_t offset_file  = 0;
@@ -142,7 +147,7 @@ void two_e_integrals(trexio_t * trexio_file, int n_integrals, int32_t** index_ou
  * @param trexio_file Pointer to the TREXIO file structure to be closed.
  */
 void close_fun(trexio_t * trexio_file){ 
- trexio_exit_code rc; // rc variable: save the exit code
+ trexio_exit_code rc; 
  rc = trexio_close(trexio_file);
  if (rc != TREXIO_SUCCESS) {
 	 printf("TREXIO Error: %s\n", trexio_string_of_error(rc));
