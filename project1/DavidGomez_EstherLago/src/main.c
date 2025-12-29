@@ -1,5 +1,5 @@
 /**
- * @file main_final.c
+ * @file main.c
  * @brief Program to read data from a TREXIO file using it to compute the 
  * Hartree-Fock and MP2 energies
  * @authors David Gómez and Esther Lago

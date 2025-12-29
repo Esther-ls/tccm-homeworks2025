@@ -1,5 +1,5 @@
 /**
- * @file read.c
+ * @file functions.c
  * @brief Functions to read quantum chemical data using the TREXIO library.
  *
  * @author David Gómez and Esther Lago

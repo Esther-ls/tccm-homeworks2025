@@ -10,5 +10,3 @@ main: $(OBJ)
 %.o: %.c
 	$(CC) -c $<
 
-clean:
-	rm -f $(OBJ) main
