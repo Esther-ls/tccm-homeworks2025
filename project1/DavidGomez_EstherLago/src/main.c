@@ -44,21 +44,26 @@ void close_fun(trexio_t * trexio_file);
 
 double main() {
 	//Open input as TREXIO file
+	printf("Write the name of the TREXIO file, \n");
 	char input[30];
 	scanf("%s", input);
 	trexio_t* trexio_file = open_fun(input);
 	trexio_exit_code rc;
 
+	/*Open a file to write the results*/
+	char output[34];
+	sprintf(output, "%s.out", input);
+	FILE* output_file = fopen(output, "w");
 	
 	/* Read and write nuclear repulsion energy */
 	double Enn;
 	Nuclear_repulsion_energy(trexio_file, &Enn);
-	printf("Nuclear Repulsion Energy (au)	= %lf\n", Enn);
+	fprintf(output_file, "Nuclear Repulsion Energy (au)	= %lf\n", Enn);
 
 	/*Read and write the number of occupied orbitals */
 	int32_t n_up;
 	Occupied_orbitals(trexio_file, &n_up);
-	printf("Number of Occupied Orbitals	= %i\n", n_up);
+	fprintf(output_file, "Number of Occupied Orbitals	= %i\n", n_up);
 
 	/*Read and write One-Electron Integrals*/
 	int32_t mo_num;
